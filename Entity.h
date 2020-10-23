@@ -9,20 +9,17 @@
 class Entity
 {
 private:
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sf::Image image;
-    sf::Vector2f position;
-    sf::Vector2f momentum;
-
-    const float gravity = 9.8;
+    sf::RectangleShape body;
     const float mass;
 
 public:
-    Entity(sf::Image& image, float mass, sf::Vector2f position);
+    Entity(sf::Texture* texture,sf::Vector2f size ,float mass, sf::Vector2f position);
     ~Entity();
-
-    virtual bool isCollidesWithTerrain() = 0;
+    sf::RectangleShape getBody();
+    void move(sf::Vector2f movementVector);
+    void setTextureRect(sf::IntRect textureRect);
+    float getMass();
+    void drawBody(sf::RenderWindow& window);
 
 };
 

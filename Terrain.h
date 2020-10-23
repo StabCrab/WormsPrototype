@@ -5,6 +5,7 @@
 #ifndef WORMSPROTOTYPE_TERRAIN_H
 #define WORMSPROTOTYPE_TERRAIN_H
 #include "SFML/Graphics.hpp"
+#include "cmath"
 class Terrain
 {
 private:
@@ -19,5 +20,6 @@ public:
     sf::Color getPixel(int x, int y);
     void setPixel(int x, int y);
     sf::Vector2f getSpritePostition();
+    void boom(sf::Vector2f coordinates, float radius);
 };
 #endif //WORMSPROTOTYPE_TERRAIN_H

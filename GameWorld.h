@@ -16,10 +16,12 @@ private:
     sf::Texture unitTexture;
     float deltaTime = 0.f;
     sf::Clock clock;
+    const float gravity = 20;
 public:
     GameWorld(sf::RenderWindow& window, std::string level);
     ~GameWorld();
     void runLevel();
+    bool checkIfCanMove(Unit unit, Terrain terrain, bool isRight);
 };
 
 

@@ -4,19 +4,12 @@
 
 #include "Unit.h"
 
-Unit::Unit(sf::Texture *texture, sf::Vector2u imageCount,
-           float switchTime, float speed,
-           sf::Vector2f size, sf::Vector2f position)
-               : animation(texture, imageCount, switchTime)
+Unit::Unit(sf::Texture *texture, sf::Vector2f sizeUnit, float mass, sf::Vector2f position,
+           sf::Vector2u imageCount, float switchTime, float speed)
+           : Entity(texture, sizeUnit, mass, position),
+           animation(texture, imageCount, switchTime),
+           speed(speed), isFaceRight(true)
 {
-    this->speed = speed;
-    row = 0;
-    isFaceRight = true;
-    body.setSize(size);
-    body.setOrigin(body.getSize() / 2.f);
-    texture->setSmooth(true);
-    body.setTexture(texture);
-    body.setPosition(position);
 }
 
 Unit::~Unit()
@@ -27,18 +20,12 @@ Unit::~Unit()
 void Unit::MakePlayerStanding(float deltaTime)
 {
     animation.Update(0, deltaTime, isFaceRight);
-    body.setTextureRect(animation.uvRect);
-}
-
-void Unit::Draw(sf::RenderWindow& window)
-{
-    window.draw(body);
+    setTextureRect(animation.uvRect);
 }
 
 void Unit::MakePlayerMoving(float deltaTime, bool isGoingRight)
 {
     sf::Vector2f movement(0,0);
-
     if(isGoingRight)
     {
         isFaceRight = true;
@@ -50,38 +37,107 @@ void Unit::MakePlayerMoving(float deltaTime, bool isGoingRight)
         movement.x -= speed * deltaTime;
     }
     animation.Update(1, deltaTime, isFaceRight);
-    body.setTextureRect(animation.uvRect);
-    body.move(movement);
+    setTextureRect(animation.uvRect);
+    move(movement);
 }
 
 sf::Vector2f Unit::getPlayerPostion() {
-    return body.getPosition();
+    return getBody().getPosition();
 }
 
-void Unit::MakePlayerFall(float deltaTime)
+void Unit::MakePlayerFall(float deltaTime, const float gravity)
 {
     sf::Vector2f movement(0,0);
-    movement.y += speed * deltaTime / 4.f;
-    body.move(movement);
+    movement.y += gravity* getMass() * deltaTime;
+    move(movement);
 }
 
 void Unit::MakePlayerFly(float deltaTime)
 {
     sf::Vector2f movement(0,0);
     movement.y -= speed * deltaTime / 4.f;
-    body.move(movement);
+    move(movement);
 }
 
 sf::Vector2f Unit::getPlayerBottomCoordinates()
 {
-    return sf::Vector2f (body.getPosition().x, body.getPosition().y + (body.getSize().y / 2.f) - 5);
+    return sf::Vector2f (getBody().getPosition().x,
+                         getBody().getPosition().y + (getBody().getSize().y / 2.f) - 5);
 }
 
-sf::Vector2f Unit::getPlayerRightBottomCoordinates() {
-    return sf::Vector2f(body.getPosition().x + body.getSize().x / 2.f, body.getPosition().y + (body.getSize().y / 2.f));
+void Unit::unitWalk(bool isRight)
+{
+    isFaceRight = isRight;
+    if (isRight)
+    {
+        getBody().getPoint(0);
+    }
 }
 
-sf::Vector2f Unit::getPlayerLeftBottomCoordinates() {
-    return sf::Vector2f(body.getPosition().x - body.getSize().x / 2.f, body.getPosition().y + (body.getSize().y / 2.f));
+sf::Vector2f Unit::getPlayerLeftBottomCoordinates()
+{
+    return sf::Vector2f (getBody().getPosition().x - (getBody().getSize().x / 2.f),
+                         getBody().getPosition().y + (getBody().getSize().y / 2.f) - 5);
 }
+
+sf::Vector2f Unit::getPlayerRightBottomCoordinates()
+{
+    return sf::Vector2f (getBody().getPosition().x + (getBody().getSize().x / 2.f),
+                         getBody().getPosition().y + (getBody().getSize().y / 2.f) - 5);
+}
+
+sf::Vector2f Unit::getPlayerRightCoordinates()
+{
+    return sf::Vector2f (getBody().getPosition().x + (getBody().getSize().x / 2.f),
+                         getBody().getPosition().y);
+}
+
+sf::Vector2f Unit::getPlayerLeftCoordinates() {
+    return sf::Vector2f (getBody().getPosition().x - (getBody().getSize().x / 2.f),
+                         getBody().getPosition().y);
+}
+
+void Unit::draw(sf::RenderWindow& window)
+{
+    drawBody(window);
+    if (isShooting)
+    {
+        weapon->move(sf::Vector2f(10,0));
+        weapon->drawBody(window);
+    }
+}
+
+void Unit::shoot(sf::Vector2f crosshairDirection)
+{
+    if (isShooting)
+        return;
+    sf::Texture weaponTexture;
+    weaponTexture.loadFromFile("RedPoint.png");
+    weapon = new Weapon(&weaponTexture, sf::Vector2f(10,10), 5.f,
+                  getBody().getPosition(), 20, 30.f);
+    isShooting = true;
+}
+
+sf::Vector2f Unit::getWeaponCoordinates()
+{
+    return weapon->getBody().getPosition();
+}
+
+void Unit::weaponDestroy()
+{
+    isShooting = false;
+    delete weapon;
+    isShooting = false;
+}
+
+bool Unit::getIsShooting()
+{
+    return isShooting;
+}
+
+float Unit::getWeaponRadius()
+{
+    return weapon->getRadius();
+}
+
 

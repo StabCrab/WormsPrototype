@@ -9,7 +9,8 @@ add_executable(WormsPrototype
         Animation.h Animation.cpp
         Unit.h Unit.cpp
         Terrain.h Terrain.cpp
-        Entity.h Entity.cpp)
+        Entity.h Entity.cpp
+        Weapon.h Weapon.cpp)
 
 set(SFML_ROOT "D:/Libraries/SFML")
 

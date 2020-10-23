@@ -36,3 +36,27 @@ void Terrain::setTexture(std::string filename)
     texture.loadFromImage(image);
     sprite.setTexture(texture);
 }
+
+void Terrain::boom(sf::Vector2f position, float radius)
+{
+    int terrainMaxY = sprite.getPosition().y + sprite.getTexture()->getSize().y;
+    int terrainMaxX = sprite.getPosition().x + sprite.getTexture()->getSize().x;
+
+    for (float y = position.y - radius; y <= position.y + radius; ++y) {
+        if (y < sprite.getPosition().y || y >= terrainMaxY) continue;
+        for (float x = position.x - radius; x <= position.x + radius; ++x) {
+            if (x < sprite.getPosition().x || x >= terrainMaxX) continue;
+            // Determine distance between origin and current checked pixel.
+            double distance = std::sqrt(std::pow(x - position.x, 2) + std::pow(y - position.y, 2));
+
+            // If the distance is smaller than the target radius, clear that pixel (we are in the circle).
+            if (distance <= radius) {
+                image.setPixel(x - sprite.getPosition().x, y - sprite.getPosition().y, {0, 0, 0, 0});
+            }
+        }
+    }
+
+    // The image has been updated, the texture and sprite need to be notified.
+    texture.loadFromImage(image);
+    sprite.setTexture(texture);
+}
